@@ -22,10 +22,11 @@ import {
   OPERATIONS_PHONE_NUMBER
 } from './constants';
 import { AssessmentResult, AssessmentStep, RiskLevel } from './types';
-import { ReactionTest } from './components/ReactionTest';
-import { MemoryTest } from './components/MemoryTest';
-import { StroopTest } from './components/StroopTest';
-import { getFatigueAdvice } from './services/geminiService';
+// UPDATED: Imports now point to the root folder
+import { ReactionTest } from './ReactionTest';
+import { MemoryTest } from './MemoryTest';
+import { StroopTest } from './StroopTest';
+import { getFatigueAdvice } from './geminiService';
 
 const App: React.FC = () => {
   const [step, setStep] = useState<AssessmentStep>('INTRO');
