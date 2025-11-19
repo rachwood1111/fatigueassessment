@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Brain, Play, RotateCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Brain, Play } from 'lucide-react';
 
 interface MemoryTestProps {
   onComplete: (level: number) => void;
