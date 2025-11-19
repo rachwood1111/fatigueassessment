@@ -1,9 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
-import { AssessmentResult, RiskLevel } from "../types";
+// UPDATED: Import now points to the same folder
+import { AssessmentResult } from "./types";
 
 // Safe access helper for environment variables
 const getApiKey = () => {
   try {
+    // @ts-ignore
     return typeof process !== 'undefined' && process.env ? process.env.API_KEY : undefined;
   } catch (e) {
     return undefined;
