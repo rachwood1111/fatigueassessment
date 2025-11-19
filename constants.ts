@@ -1,6 +1,5 @@
-import { Question } from './types';
 
-export const OPERATIONS_PHONE_NUMBER = "0499 626 059";
+import { Question } from './types';
 
 export const QUESTIONS: Question[] = [
   {
