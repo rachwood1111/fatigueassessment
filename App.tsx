@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { 
   Activity, 
@@ -18,8 +19,7 @@ import {
   MEMORY_THRESHOLD_WARNING,
   MEMORY_THRESHOLD_CRITICAL,
   STROOP_ACCURACY_WARNING,
-  STROOP_ACCURACY_CRITICAL,
-  OPERATIONS_PHONE_NUMBER
+  STROOP_ACCURACY_CRITICAL
 } from './constants';
 import { AssessmentResult, AssessmentStep, RiskLevel } from './types';
 // UPDATED: Imports now point to the root folder
@@ -251,13 +251,12 @@ const App: React.FC = () => {
             <p className="text-white/90">Please contact Operations immediately to discuss your situation.</p>
         </div>
         
-        <a 
-            href={`tel:${OPERATIONS_PHONE_NUMBER}`}
-            className="w-full max-w-sm bg-white text-red-700 font-black text-xl py-5 rounded-2xl shadow-2xl flex items-center justify-center gap-3 hover:bg-slate-100 transition-colors active:scale-95"
+        <div 
+            className="w-full max-w-sm bg-white text-red-700 font-black text-xl py-5 rounded-2xl shadow-2xl flex items-center justify-center gap-3"
         >
             <Phone className="w-6 h-6 fill-current" />
             CALL OPERATIONS
-        </a>
+        </div>
         
         <button 
              onClick={() => setAlertDismissed(true)}
@@ -340,12 +339,11 @@ const App: React.FC = () => {
 
         {isCritical ? (
             <div className="sticky bottom-4">
-                <a 
-                    href={`tel:${OPERATIONS_PHONE_NUMBER}`}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-4 rounded-xl shadow-xl animate-pulse flex items-center justify-center gap-2"
+                <div 
+                    className="w-full bg-red-600 text-white font-bold text-lg py-4 rounded-xl shadow-xl animate-pulse flex items-center justify-center gap-2"
                 >
                     <Truck className="w-6 h-6" /> CONTACT OPERATIONS
-                </a>
+                </div>
                 <p className="text-center text-xs text-red-600 font-bold mt-2">
                     STOP WORK IMMEDIATELY. DO NOT DRIVE.
                 </p>
