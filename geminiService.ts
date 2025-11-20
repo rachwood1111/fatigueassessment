@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
-import { AssessmentResult } from "../types";
+// UPDATED: Import now points to the same folder
+import { AssessmentResult } from "./types";
 
 // Safe access helper for environment variables
 const getApiKey = () => {
@@ -29,11 +30,7 @@ export const getFatigueAdvice = async (result: AssessmentResult): Promise<string
       Analyze the following worker assessment data and provide a concise, empathetic, but firm paragraph of advice.
       
       Context:
-      - Role: Traffic Management Personnel (Safety Critical, Roadside)
-      - Environment: Outdoor, high risk, limited facilities (no break rooms, reliant on work vehicles/shelter).
-      - Regulatory Basis: Safe Work Australia Code of Practice: Managing the risk of fatigue at work (Sept 2025).
-      
-      Assessment Data:
+      - Role: Traffic Management Personnel (Safety Critical)
       - Risk Level Calculated: ${result.riskLevel}
       - Questionnaire Score (Max 15): ${result.questionScore}
       - Average Reaction Time: ${result.reactionTimeMs.toFixed(0)}ms (Normal < 350ms)
@@ -42,8 +39,8 @@ export const getFatigueAdvice = async (result: AssessmentResult): Promise<string
 
       Instructions:
       - If Risk is HIGH or CRITICAL: Be very firm. Tell them to stop work immediately, contact Operations, and DO NOT drive.
-      - If Risk is MODERATE: Suggest "Control Measures" suitable for roadside work (e.g., Task rotation between bat/radio, Strategic caffeine, cooling down in truck AC, hydration).
-      - If Risk is LOW: Encourage "Maintenance" (hydration, posture checks, eye rest).
+      - If Risk is MODERATE: Suggest specific breaks, hydration, caffeine (strategically), or a task rotation.
+      - If Risk is LOW: Encourage maintaining good habits.
       - Keep it under 100 words.
       - Do not use markdown formatting like bold or headers, just plain text.
     `;
