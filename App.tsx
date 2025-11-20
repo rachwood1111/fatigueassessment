@@ -10,7 +10,10 @@ import {
   Shield, 
   Truck,
   Phone,
-  Focus
+  Focus,
+  ThermometerSun,
+  RotateCcw,
+  Coffee
 } from 'lucide-react';
 import { 
   QUESTIONS, 
@@ -267,6 +270,71 @@ const App: React.FC = () => {
     </div>
   );
 
+  const renderStrategies = (risk: RiskLevel) => {
+    if (risk === RiskLevel.HIGH || risk === RiskLevel.CRITICAL) return null;
+
+    const strategies = risk === RiskLevel.MODERATE ? [
+        {
+            title: "Job Rotation (Critical)",
+            icon: <RotateCcw className="w-5 h-5 text-blue-600" />,
+            text: "Request to swap between 'bat' and radio/spotter duties immediately. Variation reduces cognitive fatigue."
+        },
+        {
+            title: "Environmental Reset",
+            icon: <ThermometerSun className="w-5 h-5 text-orange-600" />,
+            text: "If safe, sit in a vehicle with AC for 5 minutes. Use cool water on your face and back of neck."
+        },
+        {
+            title: "Strategic Caffeine",
+            icon: <Coffee className="w-5 h-5 text-amber-700" />,
+            text: "Consume ~100mg caffeine (1 coffee) now. It takes 20 mins to kick in. Do not exceed 400mg/shift."
+        },
+        {
+            title: "Buddy System",
+            icon: <Shield className="w-5 h-5 text-green-600" />,
+            text: "Inform your lane partner you are feeling fatigued so they can double-check your calls."
+        }
+    ] : [
+        {
+            title: "Hydration Protocol",
+            icon: <Activity className="w-5 h-5 text-blue-500" />,
+            text: "Drink 250ml cool water every hour, regardless of thirst. Dehydration mimics fatigue."
+        },
+        {
+            title: "Visual Breaks",
+            icon: <Eye className="w-5 h-5 text-purple-500" />,
+            text: "Every 20 mins, scan the far horizon (not traffic) for 20 seconds to reduce tunnel vision."
+        },
+        {
+            title: "Active Posture",
+            icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+            text: "Don't lock knees while standing. Regular calf stretches maintain blood flow to the brain."
+        }
+    ];
+
+    return (
+        <div className="mb-8">
+            <h3 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-slate-600" /> 
+                Field Action Plan (SWA 2025)
+            </h3>
+            <div className="grid gap-3">
+                {strategies.map((s, idx) => (
+                    <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
+                        <div className="bg-slate-50 p-2 rounded-lg shrink-0">
+                            {s.icon}
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-800 text-sm">{s.title}</h4>
+                            <p className="text-xs text-slate-600 mt-1 leading-relaxed">{s.text}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+  };
+
   const renderResults = () => {
     if (!finalResult) return null;
     
@@ -307,6 +375,19 @@ const App: React.FC = () => {
             <p className="text-slate-600 font-medium mt-2">Risk Level: {finalResult.riskLevel}</p>
         </div>
 
+        {/* New Strategies Section */}
+        {renderStrategies(finalResult.riskLevel)}
+
+        {/* AI Advice Section */}
+        <div className="mb-8">
+             <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
+                 <Activity className="w-4 h-4 text-blue-500" /> Safety Coach
+             </h3>
+             <div className="bg-slate-800 text-white p-5 rounded-xl shadow-md text-sm leading-relaxed">
+                 {aiAdvice || "Loading advice..."}
+             </div>
+        </div>
+
         <div className="space-y-4 mb-8">
             <h3 className="text-lg font-bold text-slate-800">Detailed Analysis</h3>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
@@ -325,16 +406,6 @@ const App: React.FC = () => {
                 <span className="text-slate-600">Attention Accuracy</span>
                 <span className={`font-bold ${finalResult.stroopAccuracy < STROOP_ACCURACY_WARNING ? 'text-amber-500' : 'text-slate-800'}`}>{finalResult.stroopAccuracy}%</span>
             </div>
-        </div>
-
-        {/* AI Advice Section */}
-        <div className="mb-8">
-             <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                 <Activity className="w-4 h-4 text-blue-500" /> Safety Coach
-             </h3>
-             <div className="bg-slate-800 text-white p-5 rounded-xl shadow-md text-sm leading-relaxed">
-                 {aiAdvice || "Loading advice..."}
-             </div>
         </div>
 
         {isCritical ? (
