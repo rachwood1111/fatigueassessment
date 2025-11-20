@@ -25,7 +25,8 @@ import {
   STROOP_ACCURACY_CRITICAL
 } from './constants';
 import { AssessmentResult, AssessmentStep, RiskLevel } from './types';
-// UPDATED: Imports now point to the root folder
+
+// Imports updated to root path
 import { ReactionTest } from './ReactionTest';
 import { MemoryTest } from './MemoryTest';
 import { StroopTest } from './StroopTest';
