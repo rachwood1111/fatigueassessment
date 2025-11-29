@@ -1,3 +1,4 @@
+
 export enum RiskLevel {
   LOW = 'LOW',
   MODERATE = 'MODERATE',
@@ -15,9 +16,10 @@ export interface AssessmentResult {
   questionScore: number;
   reactionTimeMs: number; // Average ms
   memoryLevel: number; // Max sequence reached
-  stroopAccuracy: number; // Percentage correct
+  vigilanceScore: number; // Percentage correct (Go/No-Go)
   riskLevel: RiskLevel;
   timestamp: string;
+  selectedTime: string; // HH:mm format
 }
 
 export type AssessmentStep = 
@@ -27,7 +29,7 @@ export type AssessmentStep =
   | 'REACTION_TEST'
   | 'MEMORY_INSTRUCTION'
   | 'MEMORY_TEST'
-  | 'STROOP_INSTRUCTION'
-  | 'STROOP_TEST'
+  | 'VIGILANCE_INSTRUCTION'
+  | 'VIGILANCE_TEST'
   | 'ANALYZING'
   | 'RESULTS';
