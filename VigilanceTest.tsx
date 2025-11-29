@@ -18,6 +18,12 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
   // Refs to track state inside intervals without closure issues
   const signalRef = useRef<SignalType>('NONE');
   const hasActedRef = useRef(false);
+  // Add a ref to track status to avoid stale closure issues in the game loop
+  const statusRef = useRef(status);
+
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   // Timer Logic
   useEffect(() => {
@@ -41,6 +47,7 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
     if (status !== 'PLAYING') return;
 
     let timeoutId: ReturnType<typeof setTimeout>;
+    let innerTimeoutId: ReturnType<typeof setTimeout>;
 
     const runCycle = () => {
       // 1. Reset to NONE (blank screen)
@@ -52,7 +59,7 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
       const interval = Math.floor(Math.random() * 700) + 800;
 
       timeoutId = setTimeout(() => {
-        if (status === 'DONE') return;
+        if (statusRef.current !== 'PLAYING') return;
 
         // 2. Pick a signal
         // 70% chance of GO (Green), 30% chance of STOP (Red)
@@ -64,14 +71,14 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
         
         // 3. Signal duration (how long it stays on screen)
         // 800ms to react
-        setTimeout(() => {
+        innerTimeoutId = setTimeout(() => {
              // Check for "Missed Opportunity" (Didn't tap Green)
              if (signalRef.current === 'GO' && !hasActedRef.current) {
                  setScore(s => Math.max(0, s - 10)); // Penalty for missing a green
              }
              setEventsProcessed(p => p + 1);
              
-             if (timeLeft > 1) {
+             if (statusRef.current === 'PLAYING') {
                  runCycle();
              }
         }, 800);
@@ -81,8 +88,11 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
 
     runCycle();
 
-    return () => clearTimeout(timeoutId);
-  }, [status]); // Intentionally not including timeLeft to avoid reset loop, controlled by checks
+    return () => {
+        clearTimeout(timeoutId);
+        clearTimeout(innerTimeoutId);
+    };
+  }, [status]); 
 
   // Finish Handler
   useEffect(() => {
