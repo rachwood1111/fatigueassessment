@@ -62,6 +62,7 @@ export const REACTION_THRESHOLD_MS_CRITICAL = 800;
 export const MEMORY_THRESHOLD_WARNING = 3; 
 export const MEMORY_THRESHOLD_CRITICAL = 2;
 
-// Percentage - Relaxed: 70% is now acceptable
-export const STROOP_ACCURACY_WARNING = 70; 
-export const STROOP_ACCURACY_CRITICAL = 50;
+// Vigilance (Go/No-Go) Accuracy Percentage
+// This test is easier to understand, so we expect higher accuracy than Stroop
+export const VIGILANCE_ACCURACY_WARNING = 85; 
+export const VIGILANCE_ACCURACY_CRITICAL = 70;
