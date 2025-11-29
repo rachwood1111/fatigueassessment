@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Activity, 
   AlertTriangle, 
@@ -13,7 +13,9 @@ import {
   Focus,
   ThermometerSun,
   RotateCcw,
-  Coffee
+  Coffee,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { 
   QUESTIONS, 
@@ -21,15 +23,15 @@ import {
   REACTION_THRESHOLD_MS_CRITICAL,
   MEMORY_THRESHOLD_WARNING,
   MEMORY_THRESHOLD_CRITICAL,
-  STROOP_ACCURACY_WARNING,
-  STROOP_ACCURACY_CRITICAL
+  VIGILANCE_ACCURACY_WARNING,
+  VIGILANCE_ACCURACY_CRITICAL
 } from './constants';
 import { AssessmentResult, AssessmentStep, RiskLevel } from './types';
 
 // Imports updated to root path
 import { ReactionTest } from './ReactionTest';
 import { MemoryTest } from './MemoryTest';
-import { StroopTest } from './StroopTest';
+import { VigilanceTest } from './VigilanceTest';
 import { getFatigueAdvice } from './geminiService';
 
 const App: React.FC = () => {
@@ -37,11 +39,22 @@ const App: React.FC = () => {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [reactionTime, setReactionTime] = useState<number>(0);
   const [memoryLevel, setMemoryLevel] = useState<number>(0);
-  const [stroopAccuracy, setStroopAccuracy] = useState<number>(0);
+  const [vigilanceScore, setVigilanceScore] = useState<number>(0);
   const [finalResult, setFinalResult] = useState<AssessmentResult | null>(null);
   const [aiAdvice, setAiAdvice] = useState<string>('');
   // State for alert dismissal
   const [alertDismissed, setAlertDismissed] = useState(false);
+  
+  // Time State
+  const [selectedTime, setSelectedTime] = useState<string>('');
+
+  // Initialize time on mount
+  useEffect(() => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    setSelectedTime(`${hours}:${minutes}`);
+  }, []);
 
   // --- Logic & Scoring ---
 
@@ -49,7 +62,7 @@ const App: React.FC = () => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const calculateRisk = useCallback((finalStroopScore?: number): AssessmentResult => {
+  const calculateRisk = useCallback((finalVigilanceScore?: number): AssessmentResult => {
     // 1. Questionnaire Score (0-15)
     const qScore = (Object.values(answers) as number[]).reduce((a, b) => a + b, 0);
     
@@ -73,12 +86,12 @@ const App: React.FC = () => {
     }
 
     // Use passed score if provided (to handle async state update), otherwise use state
-    const currentStroopAccuracy = finalStroopScore ?? stroopAccuracy;
+    const currentVigilanceScore = finalVigilanceScore ?? vigilanceScore;
 
-    // 5. Adjust based on Stroop (Attention)
-    if (currentStroopAccuracy < STROOP_ACCURACY_CRITICAL) {
+    // 5. Adjust based on Vigilance (Attention)
+    if (currentVigilanceScore < VIGILANCE_ACCURACY_CRITICAL) {
         risk = RiskLevel.CRITICAL;
-    } else if (currentStroopAccuracy < STROOP_ACCURACY_WARNING && risk === RiskLevel.LOW) {
+    } else if (currentVigilanceScore < VIGILANCE_ACCURACY_WARNING && risk === RiskLevel.LOW) {
         risk = RiskLevel.MODERATE;
     }
 
@@ -92,19 +105,20 @@ const App: React.FC = () => {
         questionScore: qScore,
         reactionTimeMs: reactionTime,
         memoryLevel: memoryLevel,
-        stroopAccuracy: currentStroopAccuracy,
+        vigilanceScore: currentVigilanceScore,
         riskLevel: risk,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        selectedTime: selectedTime
     };
-  }, [answers, reactionTime, memoryLevel, stroopAccuracy]);
+  }, [answers, reactionTime, memoryLevel, vigilanceScore, selectedTime]);
 
-  const completeAssessment = async (finalStroopScore: number) => {
+  const completeAssessment = async (finalVigilanceScore: number) => {
     setStep('ANALYZING');
     
     // Update state for consistency, but use the passed variable for calculation
-    setStroopAccuracy(finalStroopScore);
+    setVigilanceScore(finalVigilanceScore);
 
-    const result = calculateRisk(finalStroopScore);
+    const result = calculateRisk(finalVigilanceScore);
     setFinalResult(result);
     
     // Fetch AI Advice
@@ -123,7 +137,7 @@ const App: React.FC = () => {
             <Shield className="text-orange-500 w-6 h-6" />
             <h1 className="font-bold text-lg tracking-tight">SafetyFirst <span className="text-orange-500">FatigueCheck</span></h1>
         </div>
-        <div className="text-xs font-mono text-slate-400">v1.1</div>
+        <div className="text-xs font-mono text-slate-400">v1.3</div>
       </div>
     </header>
   );
@@ -164,8 +178,8 @@ const App: React.FC = () => {
         <div className="flex items-start gap-3">
           <div className="bg-indigo-100 p-2 rounded-full"><Focus className="w-5 h-5 text-indigo-600" /></div>
           <div>
-            <h3 className="font-semibold text-slate-800">Attention Check</h3>
-            <p className="text-sm text-slate-500">Test focus and inhibition.</p>
+            <h3 className="font-semibold text-slate-800">Vigilance Test</h3>
+            <p className="text-sm text-slate-500">Traffic light decision making.</p>
           </div>
         </div>
       </div>
@@ -181,11 +195,32 @@ const App: React.FC = () => {
 
   const renderQuestionnaire = () => {
     const qKeys = Object.keys(answers);
-    const isComplete = qKeys.length === QUESTIONS.length;
+    const isComplete = qKeys.length === QUESTIONS.length && selectedTime !== '';
+    
+    // Determine icon based on time
+    const hour = parseInt(selectedTime.split(':')[0] || "0");
+    const isNight = hour < 6 || hour > 18;
 
     return (
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-slate-800 mb-6">Self Report</h2>
+        <div className="flex justify-between items-end mb-6">
+             <h2 className="text-2xl font-bold text-slate-800">Self Report</h2>
+             <div className="flex flex-col items-end">
+                <label className="text-xs text-slate-500 font-semibold mb-1">Time (Perth)</label>
+                <div className="relative">
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                        {isNight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                    </div>
+                    <input 
+                        type="time" 
+                        value={selectedTime}
+                        onChange={(e) => setSelectedTime(e.target.value)}
+                        className="pl-8 pr-2 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-700 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                </div>
+             </div>
+        </div>
+        
         <div className="space-y-8">
           {QUESTIONS.map((q) => (
             <div key={q.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
@@ -374,6 +409,7 @@ const App: React.FC = () => {
             {icon}
             <h2 className={`text-3xl font-bold mt-4 ${colorClass}`}>{title}</h2>
             <p className="text-slate-600 font-medium mt-2">Risk Level: {finalResult.riskLevel}</p>
+            <p className="text-slate-500 text-xs mt-1">Time: {finalResult.selectedTime}</p>
         </div>
 
         {/* New Strategies Section */}
@@ -382,7 +418,7 @@ const App: React.FC = () => {
         {/* AI Advice Section */}
         <div className="mb-8">
              <h3 className="text-lg font-bold text-slate-800 mb-2 flex items-center gap-2">
-                 <Activity className="w-4 h-4 text-blue-500" /> Safety Coach
+                 <Activity className="w-4 h-4 text-blue-500" /> Safety Coach ({finalResult.selectedTime})
              </h3>
              <div className="bg-slate-800 text-white p-5 rounded-xl shadow-md text-sm leading-relaxed">
                  {aiAdvice || "Loading advice..."}
@@ -404,8 +440,8 @@ const App: React.FC = () => {
                 <span className={`font-bold ${finalResult.memoryLevel <= MEMORY_THRESHOLD_WARNING ? 'text-amber-500' : 'text-slate-800'}`}>{finalResult.memoryLevel}</span>
             </div>
             <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
-                <span className="text-slate-600">Attention Accuracy</span>
-                <span className={`font-bold ${finalResult.stroopAccuracy < STROOP_ACCURACY_WARNING ? 'text-amber-500' : 'text-slate-800'}`}>{finalResult.stroopAccuracy}%</span>
+                <span className="text-slate-600">Vigilance Score</span>
+                <span className={`font-bold ${finalResult.vigilanceScore < VIGILANCE_ACCURACY_WARNING ? 'text-amber-500' : 'text-slate-800'}`}>{finalResult.vigilanceScore}%</span>
             </div>
         </div>
 
@@ -473,21 +509,21 @@ const App: React.FC = () => {
             <div className="h-[calc(100vh-64px)] p-4 pt-10">
                 <MemoryTest onComplete={(lvl) => {
                     setMemoryLevel(lvl);
-                    setStep('STROOP_INSTRUCTION');
+                    setStep('VIGILANCE_INSTRUCTION');
                 }} />
             </div>
         )}
 
-        {step === 'STROOP_INSTRUCTION' && renderTestInstruction(
-             "Attention Check",
-             "Tap the button that matches the COLOR of the text, not the word itself. Be quick!",
-             () => setStep('STROOP_TEST'),
+        {step === 'VIGILANCE_INSTRUCTION' && renderTestInstruction(
+             "Traffic Light Test",
+             "Tap GREEN for GO. Ignore RED for STOP. Speed and accuracy count.",
+             () => setStep('VIGILANCE_TEST'),
              <Focus className="w-12 h-12 text-indigo-500" />
         )}
 
-        {step === 'STROOP_TEST' && (
+        {step === 'VIGILANCE_TEST' && (
             <div className="h-[calc(100vh-64px)] p-4">
-                <StroopTest onComplete={(score) => {
+                <VigilanceTest onComplete={(score) => {
                     completeAssessment(score);
                 }} />
             </div>
