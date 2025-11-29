@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 // UPDATED: Import now points to the same folder
 import { AssessmentResult } from "./types";
@@ -26,23 +27,32 @@ export const getFatigueAdvice = async (result: AssessmentResult): Promise<string
     const ai = new GoogleGenAI({ apiKey: apiKey });
     const model = "gemini-2.5-flash";
     const prompt = `
-      You are a Health and Safety Fatigue Management Expert for a Traffic Management company.
+      You are a Health and Safety Fatigue Management Expert for a Traffic Management company based in Perth, Western Australia.
       Analyze the following worker assessment data and provide a concise, empathetic, but firm paragraph of advice.
       
       Context:
-      - Role: Traffic Management Personnel (Safety Critical)
+      - Location: Perth, WA (Hot climate, intense sun glare, standard traffic conditions).
+      - Current Time / Shift Time: ${result.selectedTime} (24h format).
+      - Role: Traffic Management Personnel (Safety Critical).
       - Risk Level Calculated: ${result.riskLevel}
       - Questionnaire Score (Max 15): ${result.questionScore}
       - Average Reaction Time: ${result.reactionTimeMs.toFixed(0)}ms (Normal < 350ms)
       - Memory Score: Level ${result.memoryLevel} (Normal > 5)
-      - Attention/Stroop Accuracy: ${result.stroopAccuracy}% (Normal > 80%)
+      - Vigilance/Attention Score (Go/No-Go): ${result.vigilanceScore}% (Normal > 85%)
 
       Instructions:
-      - If Risk is HIGH or CRITICAL: Be very firm. Tell them to stop work immediately, contact Operations, and DO NOT drive.
-      - If Risk is MODERATE: Suggest specific breaks, hydration, caffeine (strategically), or a task rotation.
-      - If Risk is LOW: Encourage maintaining good habits.
-      - Keep it under 100 words.
-      - Do not use markdown formatting like bold or headers, just plain text.
+      1. **Time-Specific Advice**:
+         - If Morning (05:00-10:00): Mention sun glare, school zones, and morning traffic.
+         - If Midday (11:00-14:00): Mention heat stress, UV protection, hydration, and the "post-lunch dip" in alertness.
+         - If Afternoon (15:00-18:00): Mention rush hour aggression and accumulation of shift fatigue ("homeitis").
+         - If Night (19:00-04:00): Mention circadian lows (especially 02:00-04:00), visibility issues, and caffeine cutoff times.
+      
+      2. **Risk Actions**:
+         - If Risk is HIGH or CRITICAL: Be very firm. Tell them to stop work immediately, contact Operations, and DO NOT drive.
+         - If Risk is MODERATE: Suggest specific interventions (e.g., "Take a 15 min break," "Drink cool water," "Rotate task").
+         - If Risk is LOW: Encourage maintaining specific good habits relevant to the current time of day.
+
+      Keep it under 100 words. Do not use markdown formatting like bold or headers.
     `;
 
     const response = await ai.models.generateContent({
