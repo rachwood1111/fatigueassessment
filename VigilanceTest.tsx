@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Disc } from 'lucide-react';
 
 interface VigilanceTestProps {
   onComplete: (accuracy: number) => void;
@@ -12,7 +11,8 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
   const [status, setStatus] = useState<'INSTRUCTION' | 'PLAYING' | 'DONE'>('INSTRUCTION');
   const [currentSignal, setCurrentSignal] = useState<SignalType>('NONE');
   const [score, setScore] = useState(100); // Start at 100%, deduct for errors
-  const [eventsProcessed, setEventsProcessed] = useState(0);
+  // We use the setter but not the value, so we skip the first variable to appease TypeScript
+  const [, setEventsProcessed] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   
   // Refs to track state inside intervals without closure issues
@@ -109,7 +109,6 @@ export const VigilanceTest: React.FC<VigilanceTestProps> = ({ onComplete }) => {
 
     if (currentSignal === 'GO') {
         // Correct! Do nothing to score, just visual feedback?
-        // Maybe small animation or sound later.
     } else if (currentSignal === 'STOP') {
         // FAILED INHIBITION! Bad error.
         setScore(s => Math.max(0, s - 20)); // Heavy penalty for tapping Red
